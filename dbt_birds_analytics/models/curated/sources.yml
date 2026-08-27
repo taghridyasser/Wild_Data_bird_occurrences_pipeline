@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: raw_gbif_birds
+    database: BIRDS_DLT_DB
+    schema: RAW_GBIF_BIRDS
+
+    tables:
+      - name: gbif_bird_occurrences
+      - name: gbif_bird_occurrences__issues

@@ -1,9 +1,0 @@
-version: 2
-
-sources:
-  - name: raw_data
-    database: BIRDS_DB
-    schema: RAW_DATA
-
-    tables:
-      - name: OCCURRENCES
