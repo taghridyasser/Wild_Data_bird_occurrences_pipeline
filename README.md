@@ -1,142 +1,120 @@
-# Wild Data – GBIF Bird Occurrences ETL Pipeline
+
+```markdown
+# Wild Data – GBIF Bird Occurrences & Analytics Pipeline
 
 ## Project Overview
 
-This project retrieves bird occurrence records from the GBIF (Global Biodiversity Information Facility) API for Switzerland from 2015 onward.
+This repository contains an end-to-end data pipeline and analytics project for bird occurrence records in Switzerland from 2015 onward, sourced from the GBIF (Global Biodiversity Information Facility) API.
 
-The pipeline downloads occurrence records, stores the raw API responses as JSON files, transforms the data into a clean tabular format using pandas, and exports the final dataset as a CSV file.
-
-An analysis notebook is also included to answer several exploratory questions about the dataset.
+The project handles raw data extraction (Python / dlt), storage and warehousing (Snowflake), and data transformation & modeling (dbt).
 
 ---
 
 ## Data Source
 
-- GBIF Occurrence API
-- Endpoint: `/occurrence/search`
-- Documentation: https://techdocs.gbif.org/en/openapi/
+- **GBIF Occurrence API**: `/occurrence/search`
+- **Documentation**: [https://techdocs.gbif.org/en/openapi/](https://techdocs.gbif.org/en/openapi/)
+- **Filters**:
+  - Country: Switzerland (`CH`)
+  - Class: Birds (`classKey=212`)
+  - Years: 2015 onward
 
-Query filters:
+---
 
-- Country: Switzerland (`CH`)
-- Taxon: Birds (`taxonKey=212`)
-- Years: 2015 onward
+## Architecture & Data Layers
+
+Data flows through three main layers inside Snowflake managed via dbt:
+
+
+```
+
+RAW (dlt / CSV) ──> CURATED (dbt Staging & Dims) ──> SERVING (dbt Analytics)
+
+```
+
+### 1. Raw Layer
+- JSON responses and dlt pipelines landing raw records directly into Snowflake (`raw_gbif_birds`).
+
+### 2. Curated Layer (dbt)
+- `stg_occurrences`: Standardizes, casts types, and flattens fields.
+- `dim_species`: Deduplicated species metadata.
+- `dim_dataset`: Dataset lineage and metrics.
+- `fct_occurrences`: Core fact table linking occurrences to dimensions.
+
+### 3. Serving Layer (dbt)
+- `species_occurrence_summary`: Aggregated metrics per species.
+- `occurrences_by_year`: Yearly observation counts per species.
+- `data_quality_summary`: Quality issue breakdowns and coverage.
 
 ---
 
 ## Project Structure
 
-```
+```text
 bird-occurrences/
-│
 ├── data/
-│   ├── raw/              # Raw JSON pages downloaded from GBIF
-│   └── csv/              # Final cleaned CSV
-│
+│   ├── raw/                  # Downloaded GBIF JSON responses
+│   └── csv/                  # Cleaned CSV exports
+├── dbt_birds_analytics/       # dbt Project
+│   ├── models/
+│   │   ├── curated/          # Staging, Dim, and Fact SQL models
+│   │   └── serving/          # Final reporting models
+│   ├── dbt_project.yml
+│   └── profiles.yml
 ├── notebooks/
-│   └── analysis.ipynb    # Exploratory analysis
-│
+│   └── analysis.ipynb        # Exploratory analysis
 ├── src/
-│   └── main.py           # ETL pipeline
-│
+│   └── main.py               # Python extraction scripts
 ├── README.md
 ├── requirements.txt
 └── .gitignore
+
 ```
 
 ---
 
-## Installation
+## Installation & Setup
 
-Clone the repository
-
+1. **Clone the repository:**
 ```bash
-git clone https://github.com/taghridyasser/Wild_Data_bird-occurrences.git
+git clone [https://github.com/taghridyasser/Wild_Data_bird-occurrences.git](https://github.com/taghridyasser/Wild_Data_bird-occurrences.git)
+cd Wild_Data_bird-occurrences
+
 ```
 
-Create a virtual environment
 
+2. **Set up Virtual Environment:**
 ```bash
 python -m venv .venv
-```
-
-Activate it
-
-macOS / Linux
-
-```bash
 source .venv/bin/activate
-```
-
-Install dependencies
-
-```bash
 pip install -r requirements.txt
+
 ```
 
----
 
-## How to Run
-
-Run the ETL pipeline
-
+3. **Run dbt Transformations:**
 ```bash
-python src/main.py
-```
-
-The script will
-
-- Download bird occurrence records from GBIF
-- Save each API page as JSON in `data/raw/`
-- Combine all downloaded records
-- Flatten the `media` field into a single `media_url`
-- Keep the required fields
-- Rename columns
-- Export the cleaned dataset to
+cd dbt_birds_analytics
+dbt run
+dbt test
 
 ```
-data/csv/birds_occurrences.csv
-```
+
+
 
 ---
 
-## Output
+## Technologies Used
 
-### Raw Data
-
-```
-data/raw/*.json
-```
-
-### Clean Dataset
-
-```
-data/csv/birds_occurrences.csv
-```
-
----
-
-## Analysis
-
-The notebook `notebooks/analysis.ipynb` answers:
-
-- Top 20 bird species
-- Number of occurrences per year
-- Number of records without species identification
-
----
-
-## Technologies
-
-- Python
-- Requests
-- Pandas
-- Jupyter Notebook
-- Git
-- GitHub
+* **Python, Pandas, Requests** (ETL & Analysis)
+* **dlt** (Automated pipeline loading)
+* **Snowflake** (Cloud Data Warehouse)
+* **dbt (data build tool)** (Data Transformations & Data Quality)
+* **SQL, Git, GitHub**
 
 ---
 
 ## Author
 
-Taghrid Yasser
+**Taghrid Yasser**
+

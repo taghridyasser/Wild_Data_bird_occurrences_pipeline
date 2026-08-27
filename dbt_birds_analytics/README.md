@@ -13,3 +13,7 @@ Try running the following commands:
 - Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
 - Find [dbt events](https://events.getdbt.com) near you
 - Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+
+after running dbt after dlt loaded the data in snowflake , found that there are 3 columns not avialable 
+coordinate_uncertainty_m,
+media_url,
