@@ -1,113 +1,120 @@
-# Birds Analytics - dbt Project
 
-This project uses dbt and Snowflake to transform GBIF bird occurrence data
-into analytics-ready datasets.
+```markdown
+# Wild Data – GBIF Bird Occurrences & Analytics Pipeline
 
-## Architecture
+## Project Overview
 
-The dbt project follows a layered data transformation approach:
+This repository contains an end-to-end data pipeline and analytics project for bird occurrence records in Switzerland from 2015 onward, sourced from the GBIF (Global Biodiversity Information Facility) API.
 
-RAW
-↓
-CURATED
-↓
-SERVING
+The project handles raw data extraction (Python / dlt), storage and warehousing (Snowflake), and data transformation & modeling (dbt).
 
-### Curated Layer
-
-#### stg_occurrences
-Standardizes and cleans the raw occurrence data.
-
-#### dim_species
-One row per species.
-
-Columns:
-- species_key
-- accepted_scientific_name
-- species
-- kingdom
-- taxon_class
-- taxon_order
-- family
-- genus
-- taxon_rank
-- taxonomic_status
-
-#### dim_dataset
-One row per dataset.
-
-Columns:
-- dataset_key
-- record_count
-- first_seen
-- last_seen
-
-#### fct_occurrences
-One row per occurrence.
-
-Contains:
-- occurrence_key
-- species_key
-- dataset_key
-- event_date
-- year
-- month
-- day
-- decimal_latitude
-- decimal_longitude
-- coordinate_uncertainty_m
-- country_code
-- basis_of_record
-- occurrence_status
-- media_url
-- has_media
-- issues
-
-## Serving Layer
-
-### species_occurrence_summary
-One row per species.
-
-Provides:
-- occurrence_count
-- first_observed
-- last_observed
-- dataset_count
-- pct_with_coordinates
-
-### occurrences_by_year
-One row per species × year.
-
-Provides:
-- occurrence_count
-
-### data_quality_summary
-One row per issue flag.
-
-Provides:
-- record_count
-- pct_of_total
+---
 
 ## Data Source
 
-The data comes from the GBIF occurrence API.
+- **GBIF Occurrence API**: `/occurrence/search`
+- **Documentation**: [https://techdocs.gbif.org/en/openapi/](https://techdocs.gbif.org/en/openapi/)
+- **Filters**:
+  - Country: Switzerland (`CH`)
+  - Class: Birds (`classKey=212`)
+  - Years: 2015 onward
 
-The dataset contains 1,000 bird occurrence records collected for Switzerland
-from 2015 onward.
+---
 
-## Technologies
+## Architecture & Data Layers
 
-- Python
-- GBIF API
-- Snowflake
-- dbt
-- SQL
-- Git / GitHub
+Data flows through three main layers inside Snowflake managed via dbt:
 
-## Validation
 
-The dbt project was validated using:
+```
 
+RAW (dlt / CSV) ──> CURATED (dbt Staging & Dims) ──> SERVING (dbt Analytics)
+
+```
+
+### 1. Raw Layer
+- JSON responses and dlt pipelines landing raw records directly into Snowflake (`raw_gbif_birds`).
+
+### 2. Curated Layer (dbt)
+- `stg_occurrences`: Standardizes, casts types, and flattens fields.
+- `dim_species`: Deduplicated species metadata.
+- `dim_dataset`: Dataset lineage and metrics.
+- `fct_occurrences`: Core fact table linking occurrences to dimensions.
+
+### 3. Serving Layer (dbt)
+- `species_occurrence_summary`: Aggregated metrics per species.
+- `occurrences_by_year`: Yearly observation counts per species.
+- `data_quality_summary`: Quality issue breakdowns and coverage.
+
+---
+
+## Project Structure
+
+```text
+bird-occurrences/
+├── data/
+│   ├── raw/                  # Downloaded GBIF JSON responses
+│   └── csv/                  # Cleaned CSV exports
+├── dbt_birds_analytics/       # dbt Project
+│   ├── models/
+│   │   ├── curated/          # Staging, Dim, and Fact SQL models
+│   │   └── serving/          # Final reporting models
+│   ├── dbt_project.yml
+│   └── profiles.yml
+├── notebooks/
+│   └── analysis.ipynb        # Exploratory analysis
+├── src/
+│   └── main.py               # Python extraction scripts
+├── README.md
+├── requirements.txt
+└── .gitignore
+
+```
+
+---
+
+## Installation & Setup
+
+1. **Clone the repository:**
 ```bash
-dbt parse
-dbt build
+git clone [https://github.com/taghridyasser/Wild_Data_bird-occurrences.git](https://github.com/taghridyasser/Wild_Data_bird-occurrences.git)
+cd Wild_Data_bird-occurrences
+
+```
+
+
+2. **Set up Virtual Environment:**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+```
+
+
+3. **Run dbt Transformations:**
+```bash
+cd dbt_birds_analytics
+dbt run
+dbt test
+
+```
+
+
+
+---
+
+## Technologies Used
+
+* **Python, Pandas, Requests** (ETL & Analysis)
+* **dlt** (Automated pipeline loading)
+* **Snowflake** (Cloud Data Warehouse)
+* **dbt (data build tool)** (Data Transformations & Data Quality)
+* **SQL, Git, GitHub**
+
+---
+
+## Author
+
+**Taghrid Yasser**
+
