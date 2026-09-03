@@ -42,3 +42,12 @@ dbt_birds_analytics/dbt_packages/
 # =========================
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/
+
+# =========================
+# Logs
+# =========================
+logs/
+**/logs/
+
+# dbt user-specific configuration
+dbt_birds_analytics/.user.yml

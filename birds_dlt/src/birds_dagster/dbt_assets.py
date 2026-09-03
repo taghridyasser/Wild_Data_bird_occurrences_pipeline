@@ -41,6 +41,7 @@ class BirdsDbtTranslator(DagsterDbtTranslator):
 
 dbt_project = DbtProject(
     project_dir=DBT_PROJECT_DIR,
+    profiles_dir=DBT_PROJECT_DIR,
 )
 
 

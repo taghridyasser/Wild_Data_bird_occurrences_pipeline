@@ -35,7 +35,8 @@ defs = Definitions(
             "dlt": DagsterDltResource(),
             "dbt": DbtCliResource(
                 project_dir=DBT_PROJECT_DIR,
-                profiles_dir=Path.home() / ".dbt",
+                profiles_dir=DBT_PROJECT_DIR,
             ),
     },
 )
+
