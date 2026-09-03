@@ -1,0 +1,39 @@
+# Git
+.git
+.gitignore
+
+# Python virtual environments
+.venv
+**/.venv
+
+# Python cache
+__pycache__
+**/__pycache__
+*.py[cod]
+
+# Environment / secrets
+.env
+**/.env
+
+# dlt secrets
+.dlt/secrets.toml
+.dlt/secrets.toml.save
+**/.dlt/secrets.toml
+**/.dlt/secrets.toml.save
+
+# Dagster local storage
+.tmp_dagster_home_*
+**/.tmp_dagster_home_*
+
+# dbt generated files
+dbt_birds_analytics/target/
+dbt_birds_analytics/logs/
+dbt_birds_analytics/dbt_packages/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Jupyter
+.ipynb_checkpoints
+**/.ipynb_checkpoints

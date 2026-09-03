@@ -1,0 +1,119 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: birds_postgres
+
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+
+    volumes:
+      - dagster_postgres_data:/var/lib/postgresql/data
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U dagster -d dagster"] 
+      interval: 5s 
+      timeout: 5s 
+      retries: 5 
+      start_period: 10s
+
+
+  dagster-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: birds_dagster_webserver
+
+    command: dagster-webserver -h 0.0.0.0 -p 3000 -w /app/workspace.yaml
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+
+    env_file:
+      - .env
+
+    depends_on:
+      - postgres
+
+    volumes:
+      - ./workspace.yaml:/app/workspace.yaml
+      - ./dagster.yaml:/app/dagster_home/dagster.yaml:ro
+      
+
+
+
+
+  dagster-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: birds_dagster_daemon
+
+    command: >
+      sh -c "
+        cd /app/dbt_birds_analytics &&
+        dbt parse --profiles-dir . &&
+        cd /app/birds_dlt &&
+        dagster-daemon run -w /app/workspace.yaml
+      "
+
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+
+    env_file:
+      - .env
+
+    depends_on:
+      - postgres
+
+    volumes:
+      - ./workspace.yaml:/app/workspace.yaml
+      - ./dagster.yaml:/app/dagster_home/dagster.yaml:ro
+
+
+  dagster-code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: birds_dagster_code
+
+    command: >
+      sh -c "
+        cd /app/dbt_birds_analytics &&
+        dbt parse --profiles-dir . &&
+        cd /app/birds_dlt &&
+        dagster api grpc -h 0.0.0.0 -p 4000 -m birds_dagster.definitions
+      "
+
+    ports:
+      - "4000:4000"
+
+    environment:
+      DAGSTER_HOME: /app/dagster_home
+
+    env_file:
+      - .env
+
+    depends_on:
+      - postgres
+
+    volumes:
+      - ./dagster.yaml:/app/dagster_home/dagster.yaml:ro
+
+    healthcheck: 
+      test: [ "CMD-SHELL", "python -c \"import socket; s=socket.socket(); s.settimeout(2); s.connect(('localhost', 4000)); s.close()\"" ] 
+      interval: 5s 
+      timeout: 5s 
+      retries: 10 
+      start_period: 20s
+
+
+volumes:
+  dagster_postgres_data:

@@ -1,0 +1,11 @@
+Dagster==1.13.20
+dagster-dbt==0.29.20
+dagster-dlt==0.29.20
+dlt==1.30.0
+dbt-core==1.11.14
+dbt-snowflake==1.12.0
+snowflake-connector-python==4.7.2
+pandas==3.0.5
+requests==2.34.2
+dagster-webserver==1.13.20
+dagster-postgres==0.29.20
