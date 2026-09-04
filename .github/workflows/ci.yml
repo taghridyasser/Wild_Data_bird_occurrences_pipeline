@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-docker.txt
+          pip install ruff
+
+      - name: Run Ruff
+        run: |
+          ruff check birds_dlt
+
+      - name: Run dbt parse
+        env:
+          SNOWFLAKE_ACCOUNT: dummy_account
+          SNOWFLAKE_USER: dummy_user
+          SNOWFLAKE_PASSWORD: dummy_password
+          SNOWFLAKE_ROLE: dummy_role
+          SNOWFLAKE_DATABASE: dummy_database
+          SNOWFLAKE_WAREHOUSE: dummy_warehouse
+          SNOWFLAKE_SCHEMA: dummy_schema
+        working-directory: dbt_birds_analytics
+        run: |
+          dbt parse --profiles-dir .
+
+      - name: Validate Dagster definitions
+        env:
+          PYTHONPATH: birds_dlt/src:birds_dlt
+        run: |
+          python -c "from birds_dagster.definitions import defs; from dagster import Definitions; Definitions.validate_loadable(defs); print('Dagster definitions OK')"
