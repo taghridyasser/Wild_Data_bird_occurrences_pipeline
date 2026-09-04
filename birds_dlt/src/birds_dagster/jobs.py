@@ -1,6 +1,5 @@
 import dagster as dg
 
-
 gbif_daily_job = dg.define_asset_job(
     name="gbif_daily_job",
     selection=dg.AssetSelection.all(),

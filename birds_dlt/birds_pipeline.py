@@ -19,9 +19,10 @@ Run:
 """
 
 import os
+from collections.abc import Iterator
+
 import dlt
 import requests
-from typing import Iterator
 from dotenv import load_dotenv
 
 # Load credentials from .env file
@@ -35,8 +36,7 @@ COUNTRY        = "CH"           # Switzerland
 YEAR   = "2015"    # 2015 onward (GBIF range: "min,max")
 CLASS_KEY      = 212            # Aves (birds) — numeric key required
 PAGE_SIZE      = 300            # GBIF hard cap per page
-TARGET_RECORDS = int(os.getenv("TARGET_RECORDS", 1_000))
-
+TARGET_RECORDS = int(os.getenv("TARGET_RECORDS", "1000"))
 
 # ──────────────────────────────────────────────
 # Snowflake Credentials (loaded from .env)
