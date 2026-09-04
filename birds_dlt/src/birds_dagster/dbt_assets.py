@@ -3,11 +3,10 @@ from pathlib import Path
 import dagster as dg
 from dagster_dbt import (
     DagsterDbtTranslator,
-    DbtProject,
     DbtCliResource,
+    DbtProject,
     dbt_assets,
 )
-
 
 DBT_PROJECT_DIR = (
     Path(__file__).resolve().parents[3]
